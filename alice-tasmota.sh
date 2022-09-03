@@ -3,7 +3,8 @@ set -eu # missing vars or command errors will error script for safty
 
 regex="Nmap scan report for (tasmota-[^ ]*)"
 
-source ~/.ssh/tasmota.config
+[ ! -f ~/.config/tasmota.config ] || source ~/.config/tasmota.config
+[ ! -f ~/.ssh/tasmota.config ] || source ~/.ssh/tasmota.config
 
 do_tasmota_cmd(){
    # https://tasmota.github.io/docs/Commands/#management
@@ -68,19 +69,3 @@ elif [[ "${1}" == *"*"* ]]; then
 else
     do_tasmota_cmd "$@"
 fi
-
-
-
-# TESTS with CONDITINAL WRITE:
-# tasmota_secure_all
-# tasmota_hostname_all
-
-# 
-
-# do_tasmota_cmd http://tasmota-ec2e08-3592 Hostname "%s-%04d"
-# 
-
-
-# WRITES:
-# tasmota_set_timezone_all
-# tasmota_upgrade_all
