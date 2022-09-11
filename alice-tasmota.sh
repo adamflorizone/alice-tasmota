@@ -55,7 +55,7 @@ elif [[ "${2-}" == "do_config" ]]; then
 elif [[ "${1}" == *"*"* ]]; then
     # echo "Scanning network... $1 ${@:2}"
     #lines=$(cat ~/1.txt)
-    if [ -f "${path_tasmota_nmap_cache}" ] && ! test "$(find "${path_tasmota_nmap_cache}" -mmin +30)"; then
+    if [ -f "${path_tasmota_nmap_cache}" ] && ! test "$(find "${path_tasmota_nmap_cache}" -mmin +1)"; then
         lines=$(cat "${path_tasmota_nmap_cache}")
     else
         lines=$(nmap -sn "$1")
