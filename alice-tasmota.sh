@@ -1,7 +1,8 @@
 #!/bin/bash
-set -eu # missing vars or command errors will error script for safty
+set -eu # missing vars or command errors latencywill error script for safty
 
-regex="Nmap scan report for (tasmota-[^ ]*)"
+regex="Nmap scan report for (tasmota[^ ]*)"
+path_tasmota_nmap_cache=~/.cache/tasmota.nmap
 
 [ ! -f ~/.config/tasmota.config ] || source ~/.config/tasmota.config
 [ ! -f ~/.ssh/tasmota.config ] || source ~/.ssh/tasmota.config
@@ -31,34 +32,39 @@ if [ -z "${1-}" ]; then
     $0 192.168.1.* devicename
 elif [[ "${2-}" == "do_config" ]]; then
     # Disable cross scripting!
-    # ./alice-tasmota.sh 192.168.1.* SO128 0
+    #$0 $1 SO128 0
 
     # Set all hostnames to default:
-    # ./alice-tasmota.sh 192.168.1.* hostname "%s-%04d"
+    #$0 $1 hostname "%s-%04d"
 
     # Set all timezones:
-    # $0 $1 ${TASMOTA_TIMEZONE_CMD}
+    #$0 $1 ${TASMOTA_CMD_TIMEZONE}
 
     # Set all passwords
-    # $0 $1 WebPassword "${TASMOTA_PASSWORD}"
+    #$0 $1 WebPassword "${TASMOTA_PASSWORD}"
 
-    # $0 $1 "Upgrade ${TASMOTA_UPGRADE_VERSION}"
+    $0 $1 "Upgrade ${TASMOTA_UPGRADE_VERSION}"
 
-    # $0 $1 status 1
+    #$0 $1 status 1
 
-    $0 $1 devicename
+    #$0 $1 devicename
 
-    $0 $1 status 2 
+    #$0 $1 status 2 
     # | jq .StatusFWR.Version
 
 elif [[ "${1}" == *"*"* ]]; then
     # echo "Scanning network... $1 ${@:2}"
     #lines=$(cat ~/1.txt)
-    lines=$(nmap -sn "$1")
+    if [ -f "${path_tasmota_nmap_cache}" ] && ! test "$(find "${path_tasmota_nmap_cache}" -mmin +30)"; then
+        lines=$(cat "${path_tasmota_nmap_cache}")
+    else
+        lines=$(nmap -sn "$1")
+        echo "${lines}" > "${path_tasmota_nmap_cache}"
+    fi
 
     echo "["
     hostnames=( )
-    while read line; do                                                                                                         
+    while read line; do                                                                                          
         [[ $line =~ $regex ]] &&  {
             echo "  {\"${BASH_REMATCH[1]}\": $(do_tasmota_cmd "${BASH_REMATCH[1]}" "${@:2}" || echo {})},"
         } &
